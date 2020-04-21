@@ -22,4 +22,35 @@ router.post('/register', (req, res) => {
         })
 })
 
+// Login authorizaiton & token generation
+router.post('/login', (req, res) => {
+    let { username, password } = req.body;
+
+    Users.findBy({ username })
+        .then(user => {
+            if (user && bcrypt.compareSync(password, user[0].password)) {
+                const token = generateToken(user);
+                res.status(200).json({ message: 'Welcome!', token })
+            } else {
+                res.status(401).json({ message: "You cannot pass!" })
+            }
+        })
+        .catch( err => {
+            res.status(500).json({ errorMessage: err.message })
+        })
+})
+
+// Create token
+function generateToken(user) {
+    const payload = {
+        userId: user.id,
+        username: user.username
+    };
+    const secret = secrets.jwtSecret;
+    const options = {
+        expiresIn: '12h'
+    };
+    return jwt.sign(payload, secret, options)
+}
+
 module.exports = router;
