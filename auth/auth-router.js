@@ -29,7 +29,9 @@ router.post('/login', (req, res) => {
     Users.findBy({ username })
         .then(user => {
             if (user && bcrypt.compareSync(password, user[0].password)) {
-                const token = generateToken(user);
+                const token = generateToken(user[0]);
+                // console.log(user)
+                // console.log({token})
                 res.status(200).json({ message: 'Welcome!', token })
             } else {
                 res.status(401).json({ message: "You shall not pass!" })
@@ -43,8 +45,8 @@ router.post('/login', (req, res) => {
 // Create token
 function generateToken(user) {
     const payload = {
-        userId: user.id,
-        username: user.username
+        sub: user.id,
+        department: user.department
     };
     const secret = secrets.jwtSecret;
     const options = {
